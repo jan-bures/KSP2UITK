@@ -1,4 +1,6 @@
-using BepInEx.Configuration;
+using System;
+using System.Reflection;
+// using BepInEx.Configuration;
 using UitkForKsp2.API;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,7 +12,7 @@ namespace UitkForKsp2;
 /// </summary>
 public static class Configuration
 {
-    private static ConfigFile _configFile;
+    // private static ConfigFile _configFile;
 
     private const string SectionUiScaling = "UI Scaling";
 
@@ -19,22 +21,22 @@ public static class Configuration
     private const string KeyDisableBindingWarnings = "Disable input binding warnings";
 
     private const float ManualScalingDpi = 96f;
-
-    private static ConfigEntry<bool> _automaticScaling;
-    private static ConfigEntry<float> _manualUiScale;
-    private static ConfigEntry<bool> _disableBindingWarnings;
+    //
+    // private static ConfigEntry<bool> _automaticScaling;
+    // private static ConfigEntry<float> _manualUiScale;
+    // private static ConfigEntry<bool> _disableBindingWarnings;
 
     /// <summary>
     /// Whether automatic UI scaling is enabled.
     /// </summary>
     [PublicAPI]
-    public static bool IsAutomaticScalingEnabled => _automaticScaling.Value;
+    public static bool IsAutomaticScalingEnabled => true; // _automaticScaling.Value;
 
     /// <summary>
     /// If automatic UI scaling is disabled, this UI scale is used.
     /// </summary>
     [PublicAPI]
-    public static float ManualUiScale => _manualUiScale.Value;
+    public static float ManualUiScale => 1.0f; // _manualUiScale.Value;
 
     /// <summary>
     /// The current UITK screen width, taking into account whether automatic UI scaling is enabled.
@@ -71,40 +73,40 @@ public static class Configuration
     /// <summary>
     /// Whether the game's input binding warnings are disabled.
     /// </summary>
-    internal static bool DisableBindingWarnings => _disableBindingWarnings.Value;
+    internal static bool DisableBindingWarnings => true; // _disableBindingWarnings.Value;
 
-    internal static void Initialize(ConfigFile configFile)
+    /* internal static void Initialize(ConfigFile configFile)
     {
-        _configFile = configFile;
-
-        _automaticScaling = _configFile.Bind(
-            SectionUiScaling,
-            KeyAutomaticScaling,
-            true,
-            new ConfigDescription("Automatically scale UI elements based on screen resolution?")
-        );
-        _automaticScaling.SettingChanged += OnAutomaticScalingChanged;
-
-        _manualUiScale = _configFile.Bind(
-            SectionUiScaling,
-            KeyManualUiScale,
-            1.0f,
-            new ConfigDescription(
-                "The UI scale when automatic scaling is disabled.",
-                new AcceptableValueRange<float>(0.25f, 4f)
-            )
-        );
-        _manualUiScale.SettingChanged += OnManualUiScaleChanged;
-
-        _disableBindingWarnings = _configFile.Bind(
-            SectionUiScaling,
-            KeyDisableBindingWarnings,
-            true,
-            "Disable input binding warnings after interacting with UITK text fields?"
-        );
+        // _configFile = configFile;
+        //
+        // _automaticScaling = _configFile.Bind(
+        //     SectionUiScaling,
+        //     KeyAutomaticScaling,
+        //     true,
+        //     new ConfigDescription("Automatically scale UI elements based on screen resolution?")
+        // );
+        // _automaticScaling.SettingChanged += OnAutomaticScalingChanged;
+        //
+        // _manualUiScale = _configFile.Bind(
+        //     SectionUiScaling,
+        //     KeyManualUiScale,
+        //     1.0f,
+        //     new ConfigDescription(
+        //         "The UI scale when automatic scaling is disabled.",
+        //         new AcceptableValueRange<float>(0.25f, 4f)
+        //     )
+        // );
+        // _manualUiScale.SettingChanged += OnManualUiScaleChanged;
+        //
+        // _disableBindingWarnings = _configFile.Bind(
+        //     SectionUiScaling,
+        //     KeyDisableBindingWarnings,
+        //     true,
+        //     "Disable input binding warnings after interacting with UITK text fields?"
+        // );
 
         UpdateScaling();
-    }
+    } */
 
     private static void OnAutomaticScalingChanged(object sender, EventArgs e)
     {
@@ -113,19 +115,21 @@ public static class Configuration
 
     private static void OnManualUiScaleChanged(object sender, EventArgs e)
     {
-        if (_automaticScaling.Value)
-        {
-            return;
-        }
-        UitkForKsp2Plugin.Logger.LogDebug($"Manual UI scale changed to {_manualUiScale.Value}");
-        UitkForKsp2Plugin.PanelSettings.scale = _manualUiScale.Value;
+        // if (_automaticScaling.Value)
+        // {
+        //     return;
+        // }
+        // UitkForKsp2Plugin.Logger.LogDebug($"Manual UI scale changed to {_manualUiScale.Value}");
+        // UitkForKsp2Plugin.PanelSettings.scale = _manualUiScale.Value;
     }
 
+    private static MethodInfo _applyPanelSettings = typeof(PanelSettings).GetMethod("ApplyPanelSettings", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    
     private static void UpdateScaling()
     {
-        if (_automaticScaling.Value)
+        if (IsAutomaticScalingEnabled)
         {
-            UitkForKsp2Plugin.Logger.LogDebug("Automatic UI scaling enabled");
+            // UitkForKsp2Plugin.Logger.LogDebug("Automatic UI scaling enabled");
             UitkForKsp2Plugin.PanelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
             UitkForKsp2Plugin.PanelSettings.referenceResolution = new Vector2Int(
                 ReferenceResolution.Width,
@@ -135,13 +139,13 @@ public static class Configuration
         }
         else
         {
-            UitkForKsp2Plugin.Logger.LogDebug("Automatic UI scaling disabled");
+            // UitkForKsp2Plugin.Logger.LogDebug("Automatic UI scaling disabled");
             UitkForKsp2Plugin.PanelSettings.scaleMode = PanelScaleMode.ConstantPhysicalSize;
             UitkForKsp2Plugin.PanelSettings.referenceDpi = ManualScalingDpi;
             UitkForKsp2Plugin.PanelSettings.fallbackDpi = ManualScalingDpi;
-            UitkForKsp2Plugin.PanelSettings.scale = _manualUiScale.Value;
+            // UitkForKsp2Plugin.PanelSettings.scale = _manualUiScale.Value;
         }
 
-        UitkForKsp2Plugin.PanelSettings.ApplyPanelSettings();
+        _applyPanelSettings.Invoke(UitkForKsp2Plugin.PanelSettings, new object[] { });
     }
 }

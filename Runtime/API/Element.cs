@@ -1,4 +1,5 @@
-﻿using UnityEngine.UIElements;
+﻿using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
 
@@ -16,7 +17,7 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <typeparam name="T">Element type.</typeparam>
     /// <returns>New UI element.</returns>
-    public static T Create<T>(string name = null, string classes = null, IEnumerable<VisualElement> children = null)
+    public static T Create<T>(string? name = null, string? classes = null, IEnumerable<VisualElement>? children = null)
         where T : VisualElement, new()
     {
         var element = new T();
@@ -49,10 +50,10 @@ public static class Element
     /// <typeparam name="T">Element type.</typeparam>
     /// <returns>New TextElement-based UI element.</returns>
     public static T CreateText<T>(
-        string name = null,
+        string? name = null,
         string text = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     ) where T : TextElement, new()
     {
         var element = Create<T>(name, classes, children);
@@ -68,10 +69,10 @@ public static class Element
     /// <param name="classes">Element classes separated by spaces.</param>
     /// <param name="children">Children elements.</param>
     /// <returns>New VisualElement.</returns>
-    public static VisualElement VisualElement(
-        string name = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+    public static VisualElement? VisualElement(
+        string? name = null,
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         return Create<VisualElement>(name, classes, children);
@@ -85,9 +86,9 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New ScrollView element.</returns>
     public static ScrollView ScrollView(
-        string name = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? name = null,
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         var element = Create<ScrollView>(name, classes);
@@ -104,9 +105,9 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New ListView element.</returns>
     public static ListView ListView(
-        string name = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? name = null,
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         var element = Create<ListView>(name, classes);
@@ -123,9 +124,9 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New IMGUIContainer element.</returns>
     public static IMGUIContainer IMGUIContainer(
-        string name = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? name = null,
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         return Create<IMGUIContainer>(name, classes, children);
@@ -140,10 +141,10 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New Label element.</returns>
     public static Label Label(
-        string name = null,
+        string? name = null,
         string text = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         return CreateText<Label>(name, text, classes, children);
@@ -158,10 +159,10 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New Button element.</returns>
     public static Button Button(
-        string name = null,
+        string? name = null,
         string text = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         return CreateText<Button>(name, text, classes, children);
@@ -177,11 +178,11 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New Toggle element.</returns>
     public static Toggle Toggle(
-        string name = null,
+        string? name = null,
         string label = null,
         bool isActive = false,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         var element = Create<Toggle>(name, classes, children);
@@ -203,9 +204,9 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New Scroller element.</returns>
     public static Scroller Scroller(
-        string name = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? name = null,
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         return Create<Scroller>(name, classes, children);
@@ -221,11 +222,11 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New TextField element.</returns>
     public static TextField TextField(
-        string name = null,
+        string? name = null,
         string value = null,
         bool multiline = false,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         var element = Create<TextField>(name, classes, children);
@@ -248,11 +249,11 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New Foldout element.</returns>
     public static Foldout Foldout(
-        string name = null,
+        string? name = null,
         string label = null,
         bool isOpen = false,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         var element = Create<Foldout>(name, classes);
@@ -277,12 +278,12 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New Slider element.</returns>
     public static Slider Slider(
-        string name = null,
+        string? name = null,
         float? min = null,
         float? max = null,
         float? value = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         var element = Create<Slider>(name, classes, children);
@@ -315,12 +316,12 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New SliderInt element.</returns>
     public static SliderInt SliderInt(
-        string name = null,
+        string? name = null,
         int? min = null,
         int? max = null,
         int? value = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         var element = Create<SliderInt>(name, classes, children);
@@ -354,13 +355,13 @@ public static class Element
     /// <param name="children">Children elements.</param>
     /// <returns>New MinMaxSlider element.</returns>
     public static MinMaxSlider MinMaxSlider(
-        string name = null,
+        string? name = null,
         int? minLimit = null,
         int? maxLimit = null,
         int? minValue = null,
         int? maxValue = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         var element = Create<MinMaxSlider>(name, classes, children);
@@ -394,10 +395,10 @@ public static class Element
     /// <param name="classes">Element classes separated by spaces.</param>
     /// <param name="children">Children elements.</param>
     /// <returns>New root VisualElement with default styling.</returns>
-    public static VisualElement Root(
-        string name = null,
-        string classes = null,
-        IEnumerable<VisualElement> children = null
+    public static VisualElement? Root(
+        string? name = null,
+        string? classes = null,
+        IEnumerable<VisualElement>? children = null
     )
     {
         var element = VisualElement(name, classes, children);

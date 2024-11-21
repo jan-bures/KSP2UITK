@@ -1,5 +1,7 @@
-﻿using KSP.Game;
-using KSP.Input;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using UitkForKsp2.API.Interfaces;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -55,6 +57,8 @@ public static class Extensions
 
     #region VisualElement extensions
 
+    private static MethodInfo _setMethod = typeof(VisualElement).GetMethod("SetProperty", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    
     /// <summary>
     /// Set a property on a VisualElement.
     /// </summary>
@@ -65,7 +69,7 @@ public static class Extensions
     /// <returns>The element on which the property was set.</returns>
     public static T Set<T>(this T element, string name, object value) where T : VisualElement
     {
-        element.SetProperty(name, value);
+        _setMethod.Invoke(element, new[] { name, value });
         return element;
     }
 
@@ -89,7 +93,7 @@ public static class Extensions
     /// <param name="children">The children VisualElements to add.</param>
     /// <typeparam name="T">The type of the parent element which must be a subclass of VisualElement.</typeparam>
     /// <returns>The parent element to which the children were added.</returns>
-    public static T AddChildren<T>(this T element, IEnumerable<VisualElement> children) where T : VisualElement
+    public static T AddChildren<T>(this T element, IEnumerable<VisualElement>? children) where T : VisualElement
     {
         if (children == null)
         {
@@ -187,7 +191,7 @@ public static class Extensions
     /// The callback which will be called when the element is resized. The callback will be passed the size of the
     /// element and should return the position to set the element to in the reference resolution.
     /// </param>
-    public static void SetDefaultPosition(this VisualElement element, Func<Vector2, Vector2> calculatePosition)
+    public static void SetDefaultPosition(this VisualElement? element, Func<Vector2, Vector2> calculatePosition)
     {
         EventCallback<GeometryChangedEvent> geometryChanged = null;
         geometryChanged = evt => { GeometryChangedHandler(evt, element, calculatePosition, geometryChanged); };
@@ -264,42 +268,21 @@ public static class Extensions
     /// <param name="isDisabled">True to disable the game input, false to enable it.</param>
     private static void SetGameInputDisabled(bool isDisabled)
     {
-        if (GameManager.Instance is not { Game.InputManager: var inputManager })
+        if (!IInputManager.Instance.Ready)
         {
-            UitkForKsp2Plugin.Logger.LogError(
-                "Attempted to enable/disable game input, but the game instance has not yet been initialized"
-            );
+            // UitkForKsp2Plugin.Logger.LogError(
+            //     "Attempted to enable/disable game input, but the game instance has not yet been initialized"
+            // );
             return;
         }
 
         if (isDisabled)
         {
-            // Save the current input statuses so we can restore them later
-            foreach (var inputDefinition in inputManager._inputDefinitions)
-            {
-                _inputStatuses[inputDefinition.Key] = inputDefinition.Value._enabled;
-            }
-
-            // Disable all input
-            inputManager.SetInputLock(InputLocks.GlobalInputDisabled);
-            inputManager.SetInputLock(InputLocks.FlightInputDisabled);
-            inputManager.SetInputLock(InputLocks.EVAInputDisabled);
-            inputManager.SetInputLock(InputLocks.OABInputDisabled);
-            inputManager.SetInputLock(InputLocks.MapViewInputDisabled);
-            inputManager.SetInputLock(InputLocks.RDInputDisabled);
-            inputManager.SetInputLock(InputLocks.KSCInputDisabled);
-            inputManager.SetInputLock(InputLocks.AudioInputDisabled);
+            IInputManager.Instance.SetUitkInputLocks();
         }
         else
         {
-            // Restore the original input statuses
-            foreach (var inputDefinition in inputManager._inputDefinitions)
-            {
-                if (_inputStatuses.TryGetValue(inputDefinition.Key, out var wasEnabled))
-                {
-                    inputDefinition.Value.SetEnabled(wasEnabled, true);
-                }
-            }
+            IInputManager.Instance.RestoreUitkInputLocks();
         }
     }
 
@@ -312,7 +295,7 @@ public static class Extensions
     /// <param name="geometryChanged">The handler itself.</param>
     private static void GeometryChangedHandler(
         GeometryChangedEvent evt,
-        VisualElement element,
+        VisualElement? element,
         Func<Vector2, Vector2> calculatePosition,
         EventCallback<GeometryChangedEvent> geometryChanged
     )

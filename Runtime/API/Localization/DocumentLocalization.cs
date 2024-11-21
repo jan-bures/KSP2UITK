@@ -1,5 +1,8 @@
-﻿using I2.Loc;
+﻿using System;
+using System.Collections.Generic;
+// using I2.Loc;
 using UitkForKsp2;
+using UitkForKsp2.API.Interfaces;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -16,15 +19,16 @@ public class DocumentLocalization : MonoBehaviour
 {
     private readonly Dictionary<VisualElement, string> _elementDictionary = new();
 
+    
     private void Awake()
     {
         var document = gameObject.GetComponentInParent<UIDocument>(includeInactive: true);
         RegisterDocument(document);
     }
 
-    private void OnEnable() => LocalizationManager.OnLocalizeEvent += Localize;
+    private void OnEnable() => ILocalizer.Instance.OnLocalize += Localize;
 
-    private void OnDisable() => LocalizationManager.OnLocalizeEvent -= Localize;
+    private void OnDisable() => ILocalizer.Instance.OnLocalize -= Localize;
 
     /// <summary>
     /// Register or update an element to be localized. The element must have a property named "text" of type string,
@@ -90,10 +94,11 @@ public class DocumentLocalization : MonoBehaviour
 
     private static void UpdateElementLocalization(VisualElement element, string localizationKey)
     {
-        var localization = LocalizationManager.GetTranslation(localizationKey);
+        var localization = ILocalizer.Instance.GetTranslation(localizationKey);
         if (localization == null)
         {
-            UitkForKsp2Plugin.Logger.LogError($"Localization key '{localizationKey}' not found");
+            // TODO: Re-add logging
+            // UitkForKsp2Plugin.Logger.LogError($"Localization key '{localizationKey}' not found");
         }
         else
         {

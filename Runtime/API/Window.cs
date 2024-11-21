@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Reflection;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
@@ -11,24 +13,38 @@ public static class Window
 {
     private const string UIMainCanvasPath = "GameManager/Default Game Instance(Clone)/UI Manager(Clone)/Main Canvas";
 
+    private static FieldInfo _rootVisualElement =
+        typeof(UIDocument).GetField("m_RootVisualElement", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+    private static MethodInfo _addRootVisualElementToTree =
+        typeof(UIDocument).GetMethod("AddRootVisualElementToTree", BindingFlags.Instance | BindingFlags.NonPublic)!;
+    
     /// <summary>
     /// Creates an empty UIDocument.
     /// </summary>
     /// <param name="options">Options for creating the window.</param>
     /// <param name="root">Root element of the UIDocument. If null, a new empty VisualElement is created.</param>
     /// <returns>New empty UIDocument.</returns>
-    public static UIDocument Create(WindowOptions options, VisualElement root = null)
+    public static UIDocument Create(WindowOptions options, VisualElement? root = null)
     {
         var document = CreateInternal(options);
 
         root ??= Element.Root();
         SetupRootElement(root, options);
 
-        document.m_RootVisualElement = root;
-        document.AddRootVisualElementToTree();
+
+        _rootVisualElement.SetValue(document, root);
+        _addRootVisualElementToTree.Invoke(document, Array.Empty<object>());
 
         return document;
     }
+
+    
+    private static FieldInfo _sourceAsset =
+        typeof(UIDocument).GetField("sourceAsset", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+    private static MethodInfo _recreateUi =
+        typeof(UIDocument).GetMethod("RecreateUi", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     /// <summary>
     /// Creates a new UIDocument from a UXML asset.
@@ -40,8 +56,8 @@ public static class Window
     {
         var document = CreateInternal(options);
 
-        document.sourceAsset = uxml;
-        document.RecreateUI();
+        _sourceAsset.SetValue(document, uxml);
+        _recreateUi.Invoke(document, Array.Empty<object>());
 
         if (document.rootVisualElement.hierarchy.childCount > 0)
         {
@@ -72,9 +88,9 @@ public static class Window
             }
             else
             {
-                UitkForKsp2Plugin.Logger.LogWarning(
-                    $"Could not assign default parent to new window with ID {options.WindowId}"
-                );
+                // UitkForKsp2Plugin.Logger.LogWarning(
+                //     $"Could not assign default parent to new window with ID {options.WindowId}"
+                // );
             }
         }
 
@@ -84,7 +100,7 @@ public static class Window
         return document;
     }
 
-    private static void SetupRootElement(VisualElement root, WindowOptions options)
+    private static void SetupRootElement(VisualElement? root, WindowOptions options)
     {
         if (options.MoveOptions.IsMovingEnabled)
         {
@@ -234,7 +250,7 @@ public static class Window
     /// <returns>New UIDocument with the element parameter as root.</returns>
     [Obsolete("This method will be removed in 3.0.0. Use Create(WindowOptions, VisualElement) instead.")]
     public static UIDocument CreateFromElement(
-        VisualElement element,
+        VisualElement? element,
         bool enableHiding,
         string windowId = null,
         Transform parent = null,
@@ -264,7 +280,7 @@ public static class Window
     /// <returns>New UIDocument with the element parameter as root.</returns>
     [Obsolete("This method will be removed in 3.0.0. Use Create(WindowOptions, VisualElement) instead.")]
     public static UIDocument CreateFromElement(
-        VisualElement element,
+        VisualElement? element,
         string windowId = null,
         Transform parent = null,
         bool makeDraggable = false

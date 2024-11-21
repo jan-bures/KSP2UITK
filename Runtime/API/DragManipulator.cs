@@ -1,4 +1,5 @@
-﻿using UitkForKsp2;
+﻿using System;
+using UitkForKsp2;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -50,12 +51,14 @@ public class DragManipulator : IManipulator
         AllowDraggingOffScreen = allowDraggingOffScreen;
     }
 
+    private static Type _textInput = Type.GetType("UnityEngine.UIElements.TextField+TextInput, UnityEngine.UIElementsModule")!;
+    
     /// <summary>
     /// Handles the initiation of the dragging process.
     /// </summary>
     private void OnPointerDown(PointerDownEvent evt)
     {
-        if (!IsEnabled || evt.target is TextField or TextField.TextInput or TextElement { parent: TextField.TextInput })
+        if (!IsEnabled || evt.target is TextField || evt.target.GetType() == _textInput || (evt.target is TextElement te && te.parent.GetType() == _textInput))
         {
             return;
         }

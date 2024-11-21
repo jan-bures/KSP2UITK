@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;
@@ -9,6 +12,19 @@ namespace UitkForKsp2.API;
 [PublicAPI]
 public static class CustomControls
 {
+    public static MethodInfo? RegisterFactory;
+
+    static CustomControls()
+    {
+        RegisterFactory =
+            Type.GetType("UnityEngine.UIElements.VisualElementFactoryRegistry, UnityEngine.UIElementsModule")?
+                .GetMethod("RegisterFactory", BindingFlags.Static | BindingFlags.NonPublic);
+        if (RegisterFactory == null)
+        {
+            Debug.LogError("Unable to initialize custom controls for UITK for KSP2");
+        }
+    }
+    
     /// <summary>
     /// Register all custom controls from the given assembly using their <see cref="IUxmlFactory"/>.
     /// </summary>
@@ -23,8 +39,7 @@ public static class CustomControls
             .ToList()
             .ForEach(type =>
             {
-                var factory = Activator.CreateInstance(type) as IUxmlFactory;
-                VisualElementFactoryRegistry.RegisterFactory(factory);
+                if (Activator.CreateInstance(type) is IUxmlFactory factory) RegisterFactory?.Invoke(null, new object[] { factory });
             });
     }
 }
