@@ -98,7 +98,7 @@ public class DocumentLocalization : MonoBehaviour
         if (localization == null)
         {
             // TODO: Re-add logging
-            // UitkForKsp2Plugin.Logger.LogError($"Localization key '{localizationKey}' not found");
+            UitkForKsp2Plugin.Logger.LogError($"Localization key '{localizationKey}' not found");
         }
         else
         {

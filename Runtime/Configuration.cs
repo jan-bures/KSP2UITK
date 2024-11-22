@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using ReduxLib.Configuration;
 // using BepInEx.Configuration;
 using UitkForKsp2.API;
 using UnityEngine;
@@ -12,7 +13,7 @@ namespace UitkForKsp2;
 /// </summary>
 public static class Configuration
 {
-    // private static ConfigFile _configFile;
+    private static IConfigFile _configFile;
 
     private const string SectionUiScaling = "UI Scaling";
 
@@ -22,9 +23,9 @@ public static class Configuration
 
     private const float ManualScalingDpi = 96f;
     //
-    // private static ConfigEntry<bool> _automaticScaling;
-    // private static ConfigEntry<float> _manualUiScale;
-    // private static ConfigEntry<bool> _disableBindingWarnings;
+    private static ConfigValue<bool> _automaticScaling;
+    private static ConfigValue<float> _manualUiScale;
+    private static ConfigValue<bool> _disableBindingWarnings;
 
     /// <summary>
     /// Whether automatic UI scaling is enabled.
@@ -75,52 +76,50 @@ public static class Configuration
     /// </summary>
     internal static bool DisableBindingWarnings => true; // _disableBindingWarnings.Value;
 
-    /* internal static void Initialize(ConfigFile configFile)
-    {
-        // _configFile = configFile;
-        //
-        // _automaticScaling = _configFile.Bind(
-        //     SectionUiScaling,
-        //     KeyAutomaticScaling,
-        //     true,
-        //     new ConfigDescription("Automatically scale UI elements based on screen resolution?")
-        // );
-        // _automaticScaling.SettingChanged += OnAutomaticScalingChanged;
-        //
-        // _manualUiScale = _configFile.Bind(
-        //     SectionUiScaling,
-        //     KeyManualUiScale,
-        //     1.0f,
-        //     new ConfigDescription(
-        //         "The UI scale when automatic scaling is disabled.",
-        //         new AcceptableValueRange<float>(0.25f, 4f)
-        //     )
-        // );
-        // _manualUiScale.SettingChanged += OnManualUiScaleChanged;
-        //
-        // _disableBindingWarnings = _configFile.Bind(
-        //     SectionUiScaling,
-        //     KeyDisableBindingWarnings,
-        //     true,
-        //     "Disable input binding warnings after interacting with UITK text fields?"
-        // );
+     internal static void Initialize(IConfigFile configFile)
+     {
+         _configFile = configFile;
+         
+         _automaticScaling = new (_configFile.Bind(
+             SectionUiScaling,
+             KeyAutomaticScaling,
+             true,
+             "Automatically scale UI elements based on screen resolution?"
+         ));
+         _automaticScaling.RegisterCallback(OnAutomaticScalingChanged);
+         
+         _manualUiScale = new(_configFile.Bind(
+             SectionUiScaling,
+             KeyManualUiScale,
+             1.0f,
+             "The UI scale when automatic scaling is disabled.",
+             new RangeConstraint<float>(0.25f,4f)
+         ));
+         _manualUiScale.RegisterCallback(OnManualUiScaleChanged);
+         
+         _disableBindingWarnings = new(_configFile.Bind(
+             SectionUiScaling,
+             KeyDisableBindingWarnings,
+             true,
+             "Disable input binding warnings after interacting with UITK text fields?"
+         ));
 
-        UpdateScaling();
-    } */
+         UpdateScaling();
+     }
 
-    private static void OnAutomaticScalingChanged(object sender, EventArgs e)
+    private static void OnAutomaticScalingChanged(bool from, bool to)
     {
         UpdateScaling();
     }
 
-    private static void OnManualUiScaleChanged(object sender, EventArgs e)
+    private static void OnManualUiScaleChanged(float from, float to)
     {
-        // if (_automaticScaling.Value)
-        // {
-        //     return;
-        // }
-        // UitkForKsp2Plugin.Logger.LogDebug($"Manual UI scale changed to {_manualUiScale.Value}");
-        // UitkForKsp2Plugin.PanelSettings.scale = _manualUiScale.Value;
+        if (_automaticScaling.Value)
+        {
+            return;
+        }
+        UitkForKsp2Plugin.Logger.LogDebug($"Manual UI scale changed to {_manualUiScale.Value}");
+        UitkForKsp2Plugin.PanelSettings.scale = _manualUiScale.Value;
     }
 
     private static MethodInfo _applyPanelSettings = typeof(PanelSettings).GetMethod("ApplyPanelSettings", BindingFlags.Instance | BindingFlags.NonPublic)!;

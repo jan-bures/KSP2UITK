@@ -253,7 +253,7 @@ public static class Extensions
     private static void Log(string message)
     {
 #if !RELEASE
-        Debug.Log(message);
+        UitkForKsp2Plugin.Logger.LogInfo(message);
 #endif
     }
 

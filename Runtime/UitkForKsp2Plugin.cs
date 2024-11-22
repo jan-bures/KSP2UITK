@@ -7,33 +7,20 @@ using System.Reflection;
 // using HarmonyLib;
 
 using UitkForKsp2.API;
+using UitkForKsp2.Controls;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UIElements;
+using ILogger = ReduxLib.Logging.ILogger;
 
 namespace UitkForKsp2;
 
 /// <summary>
 /// UITK for KSP 2 main plugin class.
 /// </summary>
-// [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
 {
-    /// <summary>
-    /// Plugin GUID.
-    /// </summary>
-    // [PublicAPI] public const string ModGuid = MyPluginInfo.PLUGIN_GUID;
-
-    /// <summary>
-    /// Plugin name.
-    /// </summary>
-    // [PublicAPI] public const string ModName = MyPluginInfo.PLUGIN_NAME;
-
-    /// <summary>
-    /// Plugin version.
-    /// </summary>
-    // [PublicAPI] public const string ModVer = MyPluginInfo.PLUGIN_VERSION;
 
     /// <summary>
     /// The default UITK for KSP 2 panel settings with the KerbalUI theme. Do not modify this, as all mods using UITK
@@ -42,24 +29,27 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
     /// </summary>
     public static PanelSettings PanelSettings { get; private set; }
 
-    // internal new static ManualLogSource Logger;
+    internal static ILogger Logger;
 
-//    private static readonly string CatalogPath = Path.Combine(
-//        Paths.PluginPath, ModGuid, "addressables", "catalog.json"
-//    );
     private const string PanelSettingsLabel = "kerbalui";
+    
 
-    /// <summary>
-    /// Creates a new instance of the <see cref="UitkForKsp2Plugin"/> class.
-    /// </summary>
-    // public UitkForKsp2Plugin()
-    // {
-    //    Logger = base.Logger;
-    // }
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+    public static void AttachToReduxLib()
+    {
+        ReduxLib.ReduxLib.OnReduxLibInitialized += PreInitializeUitkForKsp2;
+    }
 
+    private static void PreInitializeUitkForKsp2()
+    {
+        Logger = ReduxLib.ReduxLib.GetLogger("UITK For KSP2");
+        Logger.LogInfo("Pre-initialized");
+    }
+    
     public static void InitializeUitkForKsp2()
     {
         LoadPanelSettings();
+        Configuration.Initialize(ReduxLib.ReduxLib.ReduxCoreConfig);
         /*
             Redo configuration once the game exists
             Configuration.Initialize();
@@ -67,44 +57,31 @@ public static class UitkForKsp2Plugin /* : BaseUnityPlugin */
         // Harmony.CreateAndPatchAll(typeof(UitkForKsp2Plugin).Assembly);
 
         // Register custom controls
-        // var controlsAssembly = Assembly.LoadFile(
-        //    Path.Combine(Paths.PluginPath, ModGuid, "UitkForKsp2.Controls.dll")
-        // );
+        // var controlsAssembly = typeof(BaseControl).Assembly;
         // CustomControls.RegisterFromAssembly(controlsAssembly);
 
-        // Logger.LogInfo($"Plugin {ModName} loaded");
+        Logger.LogInfo("Initialized!");
     }
 
     private static void LoadPanelSettings()
     {
         try
         {
-            // var catalogHandle = Addressables.LoadContentCatalogAsync(CatalogPath);
-            // catalogHandle.WaitForCompletion();
-            // if (catalogHandle.Status == AsyncOperationStatus.Failed)
-            // {
-            //     Logger.LogError($"Failed to load addressables catalog {CatalogPath}");
-            //     return;
-            // }
-            //
-            // Logger.LogInfo($"Loaded addressables catalog {CatalogPath}");
-            // Logger.LogInfo($"{CatalogPath} ----- {catalogHandle.Result.LocatorId}");
-            // Addressables.AddResourceLocator(catalogHandle.Result);
 
             var panelSettingsHandle = Addressables.LoadAssetAsync<PanelSettings>(PanelSettingsLabel);
             panelSettingsHandle.WaitForCompletion();
             if (panelSettingsHandle.Status == AsyncOperationStatus.Failed)
             {
-                Debug.LogError($"Failed to load PanelSettings asset from label '{PanelSettingsLabel}'");
+                Logger.LogError($"Failed to load PanelSettings asset from label '{PanelSettingsLabel}'");
                 return;
             }
 
             PanelSettings = panelSettingsHandle.Result;
-            Debug.Log($"PanelSettings loaded: {PanelSettings}");
+            Logger.LogInfo($"PanelSettings loaded: {PanelSettings}");
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to load addressables: {e}");
+            Logger.LogError($"Failed to load addressables: {e}");
         }
     }
 }

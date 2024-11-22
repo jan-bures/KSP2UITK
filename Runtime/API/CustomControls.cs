@@ -21,7 +21,7 @@ public static class CustomControls
                 .GetMethod("RegisterFactory", BindingFlags.Static | BindingFlags.NonPublic);
         if (RegisterFactory == null)
         {
-            Debug.LogError("Unable to initialize custom controls for UITK for KSP2");
+            UitkForKsp2Plugin.Logger.LogError("Unable to initialize custom controls for UITK for KSP2");
         }
     }
     

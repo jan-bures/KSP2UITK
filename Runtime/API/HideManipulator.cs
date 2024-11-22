@@ -23,7 +23,7 @@ public class HideManipulator : IManipulator
         {
             if (!IInputManager.Instance.Ready)
             {
-                // UitkForKsp2Plugin.Logger.LogError("HideManipulator: GameManager.Instance is null.");
+                UitkForKsp2Plugin.Logger.LogError("HideManipulator: GameManager.Instance is null.");
                 return;
             }
 
