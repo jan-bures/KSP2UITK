@@ -1,4 +1,4 @@
-﻿using UitkForKsp2.API.Interfaces;
+﻿using ReduxLib.GameInterfaces;
 using UnityEngine.UIElements;
 
 namespace UitkForKsp2.API;

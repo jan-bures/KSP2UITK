@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using ReduxLib.GameInterfaces;
 // using I2.Loc;
 using UitkForKsp2;
-using UitkForKsp2.API.Interfaces;
 using UnityEngine;
 using UnityEngine.UIElements;
 
