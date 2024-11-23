@@ -44,7 +44,7 @@ public static class Window
         typeof(UIDocument).GetField("sourceAsset", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     private static MethodInfo _recreateUi =
-        typeof(UIDocument).GetMethod("RecreateUi", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        typeof(UIDocument).GetMethod("RecreateUI", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     /// <summary>
     /// Creates a new UIDocument from a UXML asset.
